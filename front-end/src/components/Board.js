@@ -1,4 +1,3 @@
-JavaScript
 import React from 'react';
 import Column from './Column';
 
@@ -18,3 +17,5 @@ function Board({ tasks, onMoveTask }) {
     </div>
   );
 }
+
+export default Board;

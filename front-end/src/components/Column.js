@@ -1,4 +1,3 @@
-JavaScript
 import React from 'react';
 import TaskCard from './TaskCard';
 
@@ -28,3 +27,5 @@ function Column({ title, tasks, onMoveTask }) {
     </div>
   );
 }
+
+export default Column;
