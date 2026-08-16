@@ -1,14 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const { getTasks, createTask, updateTask, deleteTask } = require('../controllers/taskController');
-const { protect } = require('../middleware/authMiddleware');
+const {
+  getTasks,
+  createTask,
+  updateTask,
+  deleteTask
+} = require('../controllers/taskController');
 
-// Public route to fetch tasks
-router.get('/', getTasks);
-
-// Protected routes requiring JWT Auth
-router.post('/', protect, createTask);
-router.put('/:id', protect, updateTask);
-router.delete('/:id', protect, deleteTask);
+// Task endpoints (unprotected for local testing; wrap with `protect` for JWT enforcement)
+router.route('/').get(getTasks).post(createTask);
+router.route('/:id').put(updateTask).delete(deleteTask);
 
 module.exports = router;
