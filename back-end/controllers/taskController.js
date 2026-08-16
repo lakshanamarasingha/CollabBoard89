@@ -1,4 +1,4 @@
-JavaScript
+
 const Task = require('../models/Task');
 
 // GET /api/tasks
