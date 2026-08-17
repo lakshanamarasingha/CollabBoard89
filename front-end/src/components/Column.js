@@ -1,34 +1,47 @@
 import React from 'react';
 import TaskCard from './TaskCard';
 
-function Column({ status, tasks, onMoveTask, onDeleteTask }) {
+function Column({ status, title, tasks = [], onMoveTask, onDeleteTask }) {
+  const columnTitle = status || title;
+
   return (
     <div
       style={{
         flex: 1,
         backgroundColor: '#ebf8ff',
-        padding: '16px',
+        border: '1px solid #cbd5e0',
         borderRadius: '8px',
+        padding: '16px',
+        minWidth: '280px',
         minHeight: '500px'
       }}
     >
-      <h2
-        style={{
-          fontSize: '18px',
-          marginBottom: '16px',
-          color: '#2b6cb0'
-        }}
-      >
-        {status} ({tasks.length})
-      </h2>
-
       <div
         style={{
           display: 'flex',
-          flexDirection: 'column',
-          gap: '12px'
+          justify: 'space-between',
+          alignItems: 'center',
+          marginBottom: '16px'
         }}
       >
+        <h2 style={{ margin: 0, fontSize: '18px', color: '#2b6cb0' }}>
+          {columnTitle}
+        </h2>
+        <span
+          style={{
+            backgroundColor: '#bee3f8',
+            color: '#2b6cb0',
+            padding: '2px 8px',
+            borderRadius: '12px',
+            fontSize: '12px',
+            fontWeight: 'bold'
+          }}
+        >
+          {tasks.length}
+        </span>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         {tasks.map((task) => (
           <TaskCard
             key={task._id}
