@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 function TaskForm({ onAddTask, onClose }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [assignedTo, setAssignedTo] = useState('');
   const [status, setStatus] = useState('To Do');
 
   const handleSubmit = (e) => {
@@ -10,7 +11,20 @@ function TaskForm({ onAddTask, onClose }) {
 
     if (!title.trim()) return;
 
-    onAddTask({ title, description, status });
+    onAddTask({
+      title,
+      description,
+      assignedTo: assignedTo || 'Unassigned',
+      status: status || 'To Do'
+    });
+
+    // Reset form fields
+    setTitle('');
+    setDescription('');
+    setAssignedTo('');
+    setStatus('To Do');
+
+    if (onClose) onClose();
   };
 
   return (
@@ -23,7 +37,7 @@ function TaskForm({ onAddTask, onClose }) {
         bottom: 0,
         backgroundColor: 'rgba(0,0,0,0.5)',
         display: 'flex',
-        justifyContent: 'center',
+        justify: 'center',
         alignItems: 'center',
         zIndex: 1000
       }}
@@ -34,16 +48,16 @@ function TaskForm({ onAddTask, onClose }) {
           backgroundColor: '#fff',
           padding: '24px',
           borderRadius: '8px',
-          width: '350px'
+          width: '350px',
+          boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
         }}
       >
-        <h2 style={{ marginTop: 0 }}>Create Task</h2>
+        <h2 style={{ marginTop: 0, marginBottom: '16px', fontSize: '20px' }}>Create Task</h2>
 
         <div style={{ marginBottom: '12px' }}>
-          <label style={{ display: 'block', marginBottom: '4px' }}>
-            Title
+          <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: 'bold' }}>
+            Title *
           </label>
-
           <input
             type="text"
             value={title}
@@ -52,34 +66,54 @@ function TaskForm({ onAddTask, onClose }) {
               width: '100%',
               padding: '8px',
               borderRadius: '4px',
-              border: '1px solid #ccc'
+              border: '1px solid #cbd5e0',
+              boxSizing: 'border-box'
             }}
             required
           />
         </div>
 
         <div style={{ marginBottom: '12px' }}>
-          <label style={{ display: 'block', marginBottom: '4px' }}>
+          <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: 'bold' }}>
             Description
           </label>
-
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+            rows="3"
             style={{
               width: '100%',
               padding: '8px',
               borderRadius: '4px',
-              border: '1px solid #ccc'
+              border: '1px solid #cbd5e0',
+              boxSizing: 'border-box'
+            }}
+          />
+        </div>
+
+        <div style={{ marginBottom: '12px' }}>
+          <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: 'bold' }}>
+            Assign To
+          </label>
+          <input
+            type="text"
+            placeholder="Name (optional)"
+            value={assignedTo}
+            onChange={(e) => setAssignedTo(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '8px',
+              borderRadius: '4px',
+              border: '1px solid #cbd5e0',
+              boxSizing: 'border-box'
             }}
           />
         </div>
 
         <div style={{ marginBottom: '16px' }}>
-          <label style={{ display: 'block', marginBottom: '4px' }}>
+          <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: 'bold' }}>
             Initial Column
           </label>
-
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
@@ -87,7 +121,8 @@ function TaskForm({ onAddTask, onClose }) {
               width: '100%',
               padding: '8px',
               borderRadius: '4px',
-              border: '1px solid #ccc'
+              border: '1px solid #cbd5e0',
+              boxSizing: 'border-box'
             }}
           >
             <option value="To Do">To Do</option>
@@ -96,20 +131,14 @@ function TaskForm({ onAddTask, onClose }) {
           </select>
         </div>
 
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            gap: '8px'
-          }}
-        >
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
           <button
             type="button"
             onClick={onClose}
             style={{
               padding: '8px 12px',
-              border: 'none',
-              background: '#e2e8f0',
+              border: '1px solid #cbd5e0',
+              background: '#fff',
               borderRadius: '4px',
               cursor: 'pointer'
             }}
@@ -125,7 +154,8 @@ function TaskForm({ onAddTask, onClose }) {
               background: '#3182ce',
               color: '#fff',
               borderRadius: '4px',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              fontWeight: 'bold'
             }}
           >
             Save Task

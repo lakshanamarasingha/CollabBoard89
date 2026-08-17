@@ -1,69 +1,50 @@
 import React from 'react';
 
-function TaskCard({ task, onMoveTask }) {
+function TaskCard({ task, onMoveTask, onDeleteTask }) {
   return (
     <div
       style={{
-        backgroundColor: '#ffffff',
-        border: '1px solid #cbd5e0',
-        borderRadius: '6px',
+        backgroundColor: '#fff',
         padding: '14px',
-        marginBottom: '12px',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.08)'
+        borderRadius: '6px',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
       }}
     >
-      <h4
+      <h3
         style={{
-          margin: '0 0 6px 0',
-          fontSize: '15px',
-          color: '#1a202c'
+          margin: '0 0 8px 0',
+          fontSize: '16px'
         }}
       >
         {task.title}
-      </h4>
+      </h3>
 
       <p
         style={{
           margin: '0 0 12px 0',
-          fontSize: '13px',
-          color: '#4a5568',
-          lineHeight: '1.4'
+          fontSize: '14px',
+          color: '#4a5568'
         }}
       >
-        {task.description || 'No description provided.'}
+        {task.description}
       </p>
 
       <div
         style={{
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center',
-          marginTop: '10px',
-          paddingTop: '8px',
-          borderTop: '1px solid #edf2f7'
+          alignItems: 'center'
         }}
       >
-        <span
-          style={{
-            fontSize: '11px',
-            backgroundColor: '#ebf8ff',
-            color: '#2b6cb0',
-            padding: '2px 6px',
-            borderRadius: '4px',
-            fontWeight: 'bold'
-          }}
-        >
-          {task.assignedTo}
-        </span>
-
         <select
           value={task.status}
-          onChange={(e) => onMoveTask(task._id, e.target.value)}
+          onChange={(e) =>
+            onMoveTask(task._id, e.target.value)
+          }
           style={{
-            fontSize: '12px',
-            padding: '2px 4px',
+            padding: '4px 8px',
             borderRadius: '4px',
-            borderColor: '#cbd5e0'
+            border: '1px solid #cbd5e0'
           }}
         >
           <option value="To Do">To Do</option>
@@ -71,6 +52,18 @@ function TaskCard({ task, onMoveTask }) {
           <option value="Done">Done</option>
         </select>
 
+        <button
+          onClick={() => onDeleteTask(task._id)}
+          style={{
+            color: '#e53e3e',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            fontSize: '12px'
+          }}
+        >
+          Delete
+        </button>
       </div>
     </div>
   );

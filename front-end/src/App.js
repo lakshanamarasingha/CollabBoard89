@@ -2,113 +2,222 @@ import React, { useState, useEffect } from 'react';
 import Board from './components/Board';
 import TaskForm from './components/TaskForm';
 
-// Initial Mock Data matching API Contract
-const INITIAL_TASKS = [
-  {
-    _id: '1',
-    title: 'Set up Repo',
-    description: 'Initialize project structure',
-    status: 'Done',
-    assignedTo: 'Team'
-  },
-  {
-    _id: '2',
-    title: 'Build UI Components',
-    description: 'Create React layout components',
-    status: 'Doing',
-    assignedTo: 'Front-End Sub-Team'
-  },
-  {
-    _id: '3',
-    title: 'Build Express API',
-    description: 'Create REST endpoints',
-    status: 'To Do',
-    assignedTo: 'Back-End Sub-Team'
-  }
-];
+const API_URL = 'http://localhost:5000/api/tasks';
 
 function App() {
+  const [tasks, setTasks] = useState([]);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Client-side persistence: Load from localStorage or fall back to mock data
-  const [tasks, setTasks] = useState(() => {
-    const saved = localStorage.getItem('collabboard_tasks');
-    return saved ? JSON.parse(saved) : INITIAL_TASKS;
-  });
 
-  // Sync state to localStorage on any task update
+  // GET: Fetch tasks from backend
   useEffect(() => {
-    localStorage.setItem('collabboard_tasks', JSON.stringify(tasks));
-  }, [tasks]);
+    fetchTasks();
+  }, []);
 
 
-  // Handler to add a new task
-  const handleAddTask = (newTask) => {
-    setTasks((prev) => [
-      ...prev,
-      {
-        ...newTask,
-        _id: Date.now().toString()
+  const fetchTasks = async () => {
+    try {
+      setLoading(true);
+
+      const response = await fetch(API_URL);
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch tasks');
       }
-    ]);
+
+      const data = await response.json();
+
+      setTasks(data);
+
+    } catch (err) {
+      setError(err.message);
+
+    } finally {
+      setLoading(false);
+    }
   };
 
 
-  // Handler to update or move task status
-  const handleMoveTask = (taskId, newStatus) => {
-    setTasks((prev) =>
-      prev.map((t) =>
-        t._id === taskId
-          ? { ...t, status: newStatus }
-          : t
-      )
-    );
+  // POST: Create new task
+  const handleAddTask = async (newTaskData) => {
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newTaskData)
+      });
+
+
+      if (!response.ok) {
+        throw new Error('Failed to create task');
+      }
+
+
+      const savedTask = await response.json();
+
+      setTasks((prev) => [
+        ...prev,
+        savedTask
+      ]);
+
+      setIsFormOpen(false);
+
+
+    } catch (err) {
+      alert(`Error creating task: ${err.message}`);
+    }
+  };
+
+
+  // PUT: Update task status
+  const handleMoveTask = async (taskId, newStatus) => {
+    try {
+
+      const response = await fetch(`${API_URL}/${taskId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          status: newStatus
+        })
+      });
+
+
+      if (!response.ok) {
+        throw new Error('Failed to update task');
+      }
+
+
+      const updatedTask = await response.json();
+
+
+      setTasks((prev) =>
+        prev.map((task) =>
+          task._id === taskId
+            ? updatedTask
+            : task
+        )
+      );
+
+
+    } catch (err) {
+      alert(`Error moving task: ${err.message}`);
+    }
+  };
+
+
+  // DELETE: Remove task
+  const handleDeleteTask = async (taskId) => {
+    try {
+
+      const response = await fetch(`${API_URL}/${taskId}`, {
+        method: 'DELETE'
+      });
+
+
+      if (!response.ok) {
+        throw new Error('Failed to delete task');
+      }
+
+
+      setTasks((prev) =>
+        prev.filter((task) => task._id !== taskId)
+      );
+
+
+    } catch (err) {
+      alert(`Error deleting task: ${err.message}`);
+    }
   };
 
 
   return (
     <div
       style={{
-        maxWidth: '1200px',
-        margin: '0 auto',
-        padding: '20px',
-        fontFamily: 'Arial, sans-serif'
+        padding: '24px',
+        fontFamily: 'sans-serif',
+        backgroundColor: '#f7fafc',
+        minHeight: '100vh'
       }}
     >
+
       <header
         style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: '24px',
-          borderBottom: '2px solid #e2e8f0',
-          paddingBottom: '16px'
+          marginBottom: '24px'
         }}
       >
+
         <div>
-          <h1 style={{ margin: 0, color: '#1a202c' }}>
+          <h1
+            style={{
+              margin: 0,
+              color: '#1a202c'
+            }}
+          >
             CollabBoard
           </h1>
 
           <p
             style={{
-              margin: '4px 0 0 0',
-              color: '#718096',
-              fontSize: '14px'
+              margin: '4px 0 0',
+              color: '#718096'
             }}
           >
-            Real-time Kanban Task Management
+            Live Express & MongoDB Integration
           </p>
         </div>
 
-        <TaskForm onAddTask={handleAddTask} />
+
+        <button
+          onClick={() => setIsFormOpen(true)}
+          style={{
+            padding: '10px 18px',
+            backgroundColor: '#3182ce',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontWeight: 'bold'
+          }}
+        >
+          + Add New Task
+        </button>
+
       </header>
 
-      <main>
+
+      {error && (
+        <div style={{ color: 'red', marginBottom: '16px' }}>
+          Error: {error}
+        </div>
+      )}
+
+
+      {isFormOpen && (
+        <TaskForm
+          onAddTask={handleAddTask}
+          onClose={() => setIsFormOpen(false)}
+        />
+      )}
+
+
+      {loading ? (
+        <p>Loading tasks from server...</p>
+      ) : (
         <Board
           tasks={tasks}
           onMoveTask={handleMoveTask}
+          onDeleteTask={handleDeleteTask}
         />
-      </main>
+      )}
 
     </div>
   );
