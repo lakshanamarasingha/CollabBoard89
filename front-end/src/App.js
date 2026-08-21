@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Board from './components/Board';
 import TaskForm from './components/TaskForm';
+import socket from './socket';
 
 // Initial Mock Data matching API Contract
 const INITIAL_TASKS = [
@@ -39,6 +40,19 @@ function App() {
   useEffect(() => {
     localStorage.setItem('collabboard_tasks', JSON.stringify(tasks));
   }, [tasks]);
+
+  // Listen for real-time task creation
+useEffect(() => {
+  const handleTaskCreated = (task) => {
+    setTasks((prev) => [...prev, task]);
+  };
+
+  socket.on('taskCreated', handleTaskCreated);
+
+  return () => {
+    socket.off('taskCreated', handleTaskCreated);
+  };
+}, []);
 
 
   // Handler to add a new task
