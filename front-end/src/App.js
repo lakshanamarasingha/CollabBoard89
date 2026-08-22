@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Board from './components/Board';
 import TaskForm from './components/TaskForm';
+import socket from './socket';
 
 const API_URL = 'http://localhost:5000/api/tasks';
 
@@ -15,6 +16,19 @@ function App() {
   useEffect(() => {
     fetchTasks();
   }, []);
+
+  // Listen for real-time task creation
+useEffect(() => {
+  const handleTaskCreated = (task) => {
+    setTasks((prev) => [...prev, task]);
+  };
+
+  socket.on('taskCreated', handleTaskCreated);
+
+  return () => {
+    socket.off('taskCreated', handleTaskCreated);
+  };
+}, []);
 
 
   const fetchTasks = async () => {
