@@ -31,11 +31,22 @@ router.post('/', async (req, res) => {
   }
 });
 
+
 // Update Task & Emit Event
 router.put('/:id', async (req, res) => {
   try {
-    const updatedTask = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    // ⚠️ { new: true } is required to return the updated object
+    const updatedTask = await Task.findByIdAndUpdate(
+      req.params.id, 
+      req.body, 
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedTask) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
     
+    // Broadcast updated task to all connected clients
     const io = req.app.get('io');
     if (io) io.emit('task:updated', updatedTask);
 
@@ -45,17 +56,21 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// Delete Task & Emit Event
-router.delete('/:id', async (req, res) => {
+
+// DELETE /api/tasks/:id
+router.delete('/:id', authMiddleware, async (req, res) => {
   try {
-    await Task.findByIdAndDelete(req.params.id);
-    
-    const io = req.app.get('io');
-    if (io) io.emit('task:deleted', req.params.id);
+    const task = await Task.findByIdAndDelete(req.params.id);
+    if (!task) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
+
+    // Emit the socket event with the deleted task ID
+    req.io.emit('task:deleted', req.params.id);
 
     res.json({ message: 'Task deleted successfully' });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error deleting task' });
   }
 });
 
