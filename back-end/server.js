@@ -29,7 +29,8 @@ app.use(express.json());
 
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
-app.use('/api/tasks', require('./routes/taskRoutes'));
+app.use('/api/tasks', require('./routes/tasks'));
+app.use('/api/boards', require('./routes/boards')); // <--- ADD THIS LINE
 
 // Health check endpoint
 app.get('/', (req, res) => {

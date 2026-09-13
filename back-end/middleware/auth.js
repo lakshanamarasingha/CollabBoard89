@@ -1,45 +1,28 @@
-const express = require('express');
-const router = express.Router();
-const bcrypt = require('bcryptjs');
-const jwt = require('jwt-simple'); // or 'jsonwebtoken'
-const JWT = require('jsonwebtoken');
-const User = require('../models/User');
+const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey123';
+const auth = (req, res, next) => {
+  let token;
 
-// Register Route
-router.post('/register', async (req, res) => {
-  try {
-    const { name, email, password } = req.body;
-    let user = await User.findOne({ email });
-    if (user) return res.status(400).json({ message: 'User already exists' });
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    user = new User({ name, email, password: hashedPassword });
-    await user.save();
-
-    const token = JWT.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1d' });
-    res.status(201).json({ token, user: { id: user._id, name: user.name, email: user.email } });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    try {
+      token = req.headers.authorization.split(' ')[1];
+      const decoded = jwt.verify(
+        token,
+        process.env.JWT_SECRET || 'secretkey123'
+      );
+      req.user = decoded;
+      return next();
+    } catch (error) {
+      return res.status(401).json({ message: 'Not authorized, token failed' });
+    }
   }
-});
 
-// Login Route
-router.post('/login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: 'Invalid credentials' });
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
-
-    const token = JWT.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1d' });
-    res.json({ token, user: { id: user._id, name: user.name, email: user.email } });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  if (!token) {
+    return res.status(401).json({ message: 'Not authorized, no token provided' });
   }
-});
+};
 
-module.exports = router;
+module.exports = auth;

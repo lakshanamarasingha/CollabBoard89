@@ -2,14 +2,28 @@ const mongoose = require('mongoose');
 
 const taskSchema = new mongoose.Schema(
   {
-    title: { type: String, required: true },
-    description: { type: String, default: '' },
+    title: { 
+      type: String, 
+      required: true 
+    },
+    description: { 
+      type: String, 
+      default: '' 
+    },
     status: {
       type: String,
-      enum: ['To Do', 'Doing', 'Done'],
       default: 'To Do'
+      // Note: enum removed to allow dynamic custom column names per board
     },
-    assignedTo: { type: String, default: 'Unassigned' }
+    assignedTo: { 
+      type: String, 
+      default: 'Unassigned' 
+    },
+    boardId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Board',
+      default: null
+    }
   },
   { timestamps: true }
 );
